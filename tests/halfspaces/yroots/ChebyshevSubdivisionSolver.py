@@ -791,7 +791,7 @@ def RetrieveDimension(bounds, errs, consts, plane_consts, row_idx, col_idx, del_
 
 # Run erik code: linear = True. Run halfspaces: linear = False, SRD = False. Run dim reduction:  F,T
 
-def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = True, shouldReduceDim = True):
+def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldReduceDim = False):
     """Finds a smaller region in which any root must be.
 
     Parameters

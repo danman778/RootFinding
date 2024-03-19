@@ -10,7 +10,7 @@ from mpmath import mp, mpmathify
 mp.dps = 50
 
 types = ["erik_code","halfspaces","dim_reduction"]
-curr = types[0]
+curr = types[1]
 
 file = "t_tests/dim3/" + curr + "/"
 rootfile = "t_tests/dim3/roots/"+curr+"/"
