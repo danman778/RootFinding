@@ -11,7 +11,7 @@ import warnings
 
 dim_reduce_err = 1e-12
 err_lb = 1e-11
-box_squish = 1e-7
+box_squish = 1e-10
 
 class SolverOptions():
     """Settings for running interval checks, transformations, and subdivision in solvePolyRecursive.
@@ -791,7 +791,7 @@ def RetrieveDimension(bounds, errs, consts, plane_consts, row_idx, col_idx, del_
 
 # Run erik code: linear = True. Run halfspaces: linear = False, SRD = False. Run dim reduction:  F,T
 
-def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldReduceDim = False):
+def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldReduceDim = True):
     """Finds a smaller region in which any root must be.
 
     Parameters
@@ -833,6 +833,7 @@ def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldRe
 
     #Scale all the polynomials relative to one another
     errors = errors.copy()
+    errors_0 = errors.copy()
     for i in range(dim):
         scaleVal = np.max(np.abs(A[i]))
         if scaleVal > 0:
@@ -938,16 +939,17 @@ def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldRe
         # Use the find_vertices function to return the vertices of the intersection of halfspaces
         tell, vertices = find_vertices(A_ub, b_ub)
         if tell == 4:
-            return BoundingIntervalLinearSystem(Ms, errors_orig, finalStep, True)
+            return BoundingIntervalLinearSystem(Ms, errors_0, finalStep, True)
 
         if i == 0 and tell == 1:
             #First time through and no feasible point so throw out the entire interval
+            #print("here")
             return np.vstack([[1.0]*len(A_orig),[-1.0]*len(A_orig)]).T, True, True, True
 
         elif i == 0 and tell != 1:
             if s >= 1e25:
                 #If we have scaled more than 1e25, it should not subdivide any more
-                #This means we have zoomed up on a root and we should be done.
+                #This means we have zoomed up on a root and we should be done
                 return np.vstack([[-1.0]*len(A_orig),[1.0]*len(A_orig)]).T, False, True, False
             
             #Get the a and b arrays
@@ -1024,7 +1026,7 @@ def BoundingIntervalLinearSystem(Ms, errors, finalStep, linear = False, shouldRe
                 else:
                     #If it's reducing the dimension then there's a chance that it would be able to shrink on the variable that gets reduced
                     if num_dim_reductions > 0:
-                        return BoundingIntervalLinearSystem(Ms,errors,finalStep,linear,False)
+                        return BoundingIntervalLinearSystem(Ms,errors_orig,finalStep,linear,False)
 
                     #If it is the second time through the loop and it did NOT change, it means we will not shrink the interval 
                     #even if we subdivide, so return the original interval with changed = False and is_done = True
@@ -1202,7 +1204,6 @@ def zoomInOnIntervalIter(Ms, errors, trackedInterval, exact):
     should_stop : bool
         Whether or not to continue subdiviing after the iteration of shrinking is completed
     """
-
     dim = len(Ms)
     #Zoom in on the current interval
     interval, changed, should_stop, throwOut = BoundingIntervalLinearSystem(Ms, errors, trackedInterval.finalStep)
@@ -1218,6 +1219,7 @@ def zoomInOnIntervalIter(Ms, errors, trackedInterval, exact):
         changed = True
     #Check if we can throw out the whole thing
     if throwOut:
+        #print("Throwing out")
         trackedInterval.empty = True
         return Ms, errors, trackedInterval, True, True
     #Check if we are done iterating
@@ -1477,6 +1479,7 @@ def solvePolyRecursive(Ms, trackedInterval, errors, solverOptions):
     """
     #TODO: Check if trackedInterval.interval has width 0 in some dimension, in which case we should get rid of that dimension.
     #If the interval is a point, return it
+    #print("Tracking on interval:",trackedInterval.interval)
     if trackedInterval.isPoint():
         return [], [trackedInterval]
 
@@ -1510,6 +1513,7 @@ def solvePolyRecursive(Ms, trackedInterval, errors, solverOptions):
     trimMs(Ms, errors)
 
     #Solve
+    #print("solving")
     dim = Ms[0].ndim
     changed = True
     zoomCount = 0
@@ -1521,7 +1525,9 @@ def solvePolyRecursive(Ms, trackedInterval, errors, solverOptions):
     while changed and zoomCount <= solverOptions.maxZoomCount:
         #Zoom in until we stop changing or we hit machine epsilon
         Ms, errors, trackedInterval, changed, should_stop = zoomInOnIntervalIter(Ms, errors, trackedInterval, solverOptions.exact)
+        #print("Hey we just zoomed in to the interval",trackedInterval.interval)
         if trackedInterval.empty: #Throw out the interval
+            #print("Empty interval?")
             return [], []
         #Only count in towards the max is we don't cut the interval in half
         newSizes = trackedInterval.dimSize()

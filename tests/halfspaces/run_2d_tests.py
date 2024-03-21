@@ -4,7 +4,7 @@ from time import time
 from matplotlib import pyplot as plt
 
 types = ["erik_code","halfspaces","dim_reduction"]
-curr = types[2]
+curr = types[0]
 
 file = "t_tests/dim2/" + curr + "/"
 rootfile = "t_tests/dim2/roots/"+curr+"/"
