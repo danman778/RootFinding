@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import utils as ut
 import os
 
 def stacktoarray(list):
@@ -25,6 +26,9 @@ def getArgName(name):
 
 def make_p_graphs():
     
+    ut.make_dir("graphs")
+    ut.make_dir("p_tests","graphs")
+
     max_degs = [0,0,30,10,7,4]
     args = ["avg_times","avg_resids","max_resids"]
     dims = np.arange(2,6)
@@ -58,6 +62,8 @@ def make_p_graphs():
 
 
 def make_extra_p_graphs():
+    ut.make_dir("graphs")
+    ut.make_dir("p_tests","graphs")
     args = ["avg_times","avg_resids","max_resids"]
     dims = np.arange(6,10)
 
@@ -87,6 +93,8 @@ def make_extra_p_graphs():
         plt.close()
 
 def make_t_graphs():
+    ut.make_dir("graphs")
+    ut.make_dir("t_tests","graphs")
     dim_2_names = ["1.1","1.2","1.3","1.4","1.5","2.1","2.2","2.3","2.4","2.5","3.1","3.2","4.1","4.2","5.1","6.1","6.2","6.3","7.1","7.2","7.3","7.4","8.1","8.2","9.1","9.2","10.1"]
     args = ["times","avg_resids","max_resids"]
     dims = np.arange(2,5)
