@@ -7,13 +7,9 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from time import time
 from mpmath import mp, mpmathify
+import utils as ut
 mp.dps = 50
 
-types = ["erik_code","halfspaces","dim_reduction"]
-curr = types[2]
-
-file = "t_tests/dim3/" + curr + "/"
-rootfile = "t_tests/dim3/roots/"+curr+"/"
 
 
 def residuals(funcs,roots):
@@ -358,18 +354,12 @@ def ex15():
     h = lambda x,y,z: np.exp(x**2*y**2)*np.sin(x-y+z)
     funcs = [f,g,h]
 
-    #f = lambda x,y,z: 0
-    #g = lambda x,y,z: 0
-    #h = lambda x,y,z: 0
-
     a = [-1,-1,-1]
     b = [1,1,1]
 
     start = time()
-    #roots = np.array([[0,0,0,0]])
     roots = solve(funcs, -np.ones(3), np.ones(3))
     t = time() - start
-    #t = 0
     return t, residuals(funcs,roots)
 
 def dex15():
@@ -454,9 +444,14 @@ def dex18():
     df4 = lambda x, y, z, x4 : (1, 1, -1, 1)
     return df, dg, dh, df4
 
-if __name__ == "__main__":
-    # max_residuals = [ex1(),ex2(),ex3(),ex4(),ex5(),ex6(),ex7(),ex8(),ex9(),ex10(),ex11(),ex12(),ex13(),ex14(),ex15(),ex16(),ex17(),ex18()]
-    # plot_resids(max_residuals)
+def run_tests(path_name):
+    file = "t_tests/dim3/" + path_name + "/"
+    rootfile = "t_tests/dim3/roots/"+ path_name +"/"
+    ut.make_dir("dim3","t_tests")
+    ut.make_dir("roots","t_tests/dim3")
+    ut.make_dir(path_name,"t_tests/dim3")
+    ut.make_dir(path_name,"t_tests/dim3/roots")
+
     tests = np.array([ex0,ex1,ex2,ex3,ex4,ex5,ex6,ex7,ex8,ex9,ex10,ex11,ex12,ex13,ex14,ex15,ex16,ex17,ex18])
     times = np.zeros_like(tests)
     avg_resids = np.zeros_like(tests)
@@ -471,7 +466,6 @@ if __name__ == "__main__":
         max_resids[i] = max_resid
         avg_resids[i] = avg_resid
         np.save(rootfile+"test_"+str(i)+".npy",roots)
-        print("Finished test",i)
     
     np.save(file+"times.npy",times)
     np.save(file+"avg_resids.npy",avg_resids)

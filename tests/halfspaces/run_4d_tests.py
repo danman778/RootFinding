@@ -7,13 +7,8 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from time import time
 from mpmath import mp, mpmathify
+import utils as ut
 mp.dps = 50
-
-types = ["erik_code","halfspaces","dim_reduction"]
-curr = types[2]
-
-file = "t_tests/dim4/" + curr + "/"
-rootfile = "t_tests/dim4/roots/"+curr+"/"
 
 
 def residuals(funcs,roots):
@@ -63,15 +58,15 @@ def ex0(polish=False):
     f2 = lambda x1,x2,x3,x4 : x1 + x2
     f3 = lambda x1,x2,x3,x4 : x1 + x2 + x3
     f4 = lambda x1,x2,x3,x4 : x1 + x2 + x3 + x4
-
+    funcs = [f1,f2,f3,f4]
     start = time()
-    roots = solve([f1,f2,f3,f4], -np.ones(4), np.ones(4), constant_check=False)
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    print(roots)
+    #print(roots)
     if polish:
         roots = newton_polish([f1,f2,f3,f4], dex0(), roots)
-    print("======================= ex 0 =======================")
-    return residuals(f1,f2,f3,f4,roots,t)
+    #print("======================= ex 0 =======================")
+    return t,residuals(funcs,roots)
 
 def dex0():
     df1 = lambda x1, x2, x3, x4: (1, 0, 0, 0)
@@ -85,17 +80,15 @@ def ex1(polish=False):
     f2 = lambda x1,x2,x3,x4 : np.cos(4*x1*x2) + np.exp(3*x2/(x1-2)) - 5
     f3 = lambda x1,x2,x3,x4 : np.cos(2*x2) - 3*x3 + 1/(x1-8)
     f4 = lambda x1,x2,x3,x4 : x1 + x2 - x3 - x4
+    funcs = [f1,f2,f3,f4]
 
-    print("Timing start")
     start = time()
-    roots = solve([f1,f2,f3,f4], -np.ones(4), np.ones(4))
-    print("Timing finished")
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
     if polish:
         roots = polish([f1,f2,f3,f4], dex1(), roots)
         print(roots)
-    print("======================= ex 1 =======================")
-    return residuals(f1,f2,f3,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex1():
     df1 = lambda x1, x2, x3, x4 : (x3*np.cos(x1*x3) + np.log(x2 + 3) - 2*x1, x1/(x2 + 3), x1*np.cos(x1*x3), 0)
@@ -110,14 +103,15 @@ def ex2():
     g = lambda x,y,z,x4: x - np.log(1/(y+3))
     h = lambda x,y,z,x4: x**2 -  z
     f4 = lambda x,y,z,x4: x + y + z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex2():
     df = lambda x, y, z, x4 : (4*y*np.sinh(4*x*y), 4*x*np.sinh(4*x*y), np.exp(z), 0)
@@ -131,14 +125,15 @@ def ex3():
     g = lambda x,y,z,x4: (y+.1)**3-(x-.1)**2
     h = lambda x,y,z,x4: x**2 + y**2 + z**2 - 1
     f4 = lambda x,y,z,x4: x + y + z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex3():
     df = lambda x, y, z, x4 : (-3*x**2, 2*y, 0, 0)
@@ -152,14 +147,15 @@ def ex4():
     g = lambda x,y,z,x4: 2*y + 18*z**10 + 25*z**8 - 45*z**7 - 5*z**6 + 5*z**5 - 5*z**4 + 5*z**3 + 40*z**2 - 31*z - 6
     h = lambda x,y,z,x4: 2*x - 2*z**9 - 5*z**7 + 5*z**6 - 5*z**5 + 5*z**4 - 5*z**3 + 5*z**2 + 1
     f4 = lambda x,y,z,x4: x - y - z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex4():
     df = lambda x, y, z, x4 : (0, 0, 22*z**10 + 27*z**8 - 40*z**7 + 15*z**2 - 8*z, 0)
@@ -172,14 +168,15 @@ def ex5():
     g = lambda x,y,z,x4: np.cos(2*(z**3 + y + np.pi/7))
     h = lambda x,y,z,x4: 1/(x+5) - y
     f4 = lambda x,y,z,x4: x - y + z - x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex5():
     df = lambda x, y, z, x4 : (4*np.exp(y)*np.sin(4*(x + z)*np.exp(y)), 4*(x + z)*np.exp(y)*np.cos(4*(x + z)*np.exp(y)), 
@@ -190,21 +187,34 @@ def dex5():
 
 #returns known residual of Rosenbrock in 4d
 def ex6():
-    return 1.11071152275615E-10
+    f = lambda x,y,z,x4: 2*(x-1) - 400*x*(y-x**2)
+    g = lambda x,y,z,x4: 2*(y-1) + 200*(y-x**2) - 400*y*(z-y**2)
+    h = lambda x,y,z,x4: 2*(z-1) + 200*(z-y**2) - 400*z*(x4-z**2)
+    f4 = lambda x,y,z,x4: 200*(x4-z**2)
+    funcs = [f,g,h,f4]
+
+    a = [-5,-5,-5,-5]
+    b = [10,10,10,10]
+
+    start = time()
+    roots = solve(funcs,a,b)
+    t = time() - start
+    return t,residuals(funcs,roots)
 
 def ex7():
     f = lambda x,y,z,x4: np.cos(10*x*y)
     g = lambda x,y,z,x4: x + y**2
     h = lambda x,y,z,x4: x + y - z
     f4 = lambda x,y,z,x4: x - y + z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex7():
     df = lambda x, y, z, x4 : (10*y*np.cos(10*x*y), 10*x*np.cos(10*x*y), 0, 0)
@@ -217,14 +227,15 @@ def ex8():
     g = lambda x,y,z,x4: -np.exp(x-2*y) + 11
     h = lambda x,y,z,x4: x + y + 3*z
     f4 = lambda x,y,z,x4: x + y + z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex8():
     df = lambda x, y, z, x4 : (2*np.exp(2*x), 0, 0, 0)
@@ -237,11 +248,12 @@ def ex9():
     f2 = lambda x,y,z,x4: 2*y / (y**2+4) - 2*y
     f3 = lambda x,y,z,x4: 2*z / (z**2-4) - 2*z
     f4 = lambda x,y,z,x4: 2*x4 / (x4 **2 - 4) - 2*x4
+    funcs = [f1,f2,f3,f4]
 
     start = time()
-    roots = solve([f1,f2,f3], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f1,f2,f3,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex9():
     df1 = lambda x, y, z, x4 : (2*(x**2 + 4)/(x**2 - 4)**2 - 2, 0, 0, 0)
@@ -254,11 +266,12 @@ def ex10():
     g = lambda x,y,z,x4: 2*x**2*y / (y**2+4) - 2*y + 2*x*z
     h = lambda x,y,z,x4: 2*z / (z**2-4) - 2*z
     f4 = lambda x,y,z,x4:x + y + z + x4
+    funcs = [f,g,h,f4]
 
     start = time()
-    roots = solve([f, g, h, f4], np.array([-1,-1,-1,-1]), np.array([1,1,.8,1]))
+    roots = solve(funcs, np.array([-1,-1,-1,-1]), np.array([1,1,.8,1]))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex10():
     df = lambda x, y, z, x4 : (-4*x*(x**4 + 4)/(x**4 - 4)**2, 0, 0, 0)
@@ -272,11 +285,12 @@ def ex11():
     g = lambda x,y,z,x4: y-(x*z)**6
     h = lambda x,y,z,x4: (x*z)+y-z
     f4 = lambda x,y,z,x4:-x - y + z - x4
+    funcs = [f,g,h,f4]
 
     start = time()
-    roots = solve([f,g,h,f4],np.array([-1,-1,-2,-1]),np.array([1,1,2,1]))
+    roots = solve(funcs,np.array([-1,-1,-2,-1]),np.array([1,1,2,1]))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex11():
     df = lambda x, y, z, x4 : (576*(x**3*z**4) - 450*x*z**2 + 700*x*z**2*y**2, 576*y**3 - 450*y + 700*x**2*z**2*y, 576*x**4*z**3 - 450*x**2*z + 700*x**2*z*y**2, 0)
@@ -290,14 +304,15 @@ def ex12():
     g = lambda x,y,z,x4: (x-.1)*(x*y - .2)
     h = lambda x,y,z,x4: x**2 + y**2 - z**2
     f4 = lambda x,y,z,x4: -x + y + z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], -np.ones(4), np.ones(4))
+    roots = solve(funcs, -np.ones(4), np.ones(4))
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex12():
     df = lambda x, y, z, x4 : (2*x*y**2, 2*x**2*y, 0, 0)
@@ -309,30 +324,33 @@ def dex12():
 def ex13():
     f = lambda x,y,z,x4: (np.exp(y-z)**2-x**3)*((y-0.7)**2-(x-0.3)**3)*((np.exp(y-z)+0.2)**2-(x+0.8)**3)*((y+0.2)**2-(x-0.8)**3)
     g = lambda x,y,z,x4: ((np.exp(y-z)+.4)**3-(x-.4)**2)*((np.exp(y-z)+.3)**3-(x-.3)**2)*((np.exp(y-z)-.5)**3-(x+.6)**2)*((np.exp(y-z)+0.3)**3-(2*x-0.8)**3)
-    h = lambda x,y,z,x4: x + y + z
-    f4 = lambda x,y,z,x4: x + y + z + x4
+    h = lambda x,y,z,x4: (x + y + z)
+    f4 = lambda x,y,z,x4: (x + y + z + x4)
+
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], a, b)
+    roots = solve(funcs, a, b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def ex14():
     f = lambda x,y,z,x4: ((x*z-.3)**2+2*(np.log(y+1.2)+0.3)**2-1)
     g = lambda x,y,z,x4: ((x-.49)**2+(y+.5)**2-1)*((x+0.5)**2+(y+0.5)**2-1)*((x-1)**2+(y-0.5)**2-1)
     h = lambda x,y,z,x4: x**4 + (np.log(y+1.4)-.3) - z
     f4 = lambda x,y,z,x4:x - y + z - x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], a, b)
+    roots = solve(funcs, a, b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex14():
     df = lambda x, y, z, x4 : (2*z*(x*z - .3), 4*(np.log(y + 1.2) + .3)/(y + 1.2), 2*x*(x*z - .3), 0)
@@ -346,16 +364,17 @@ def dex14():
 def ex15():
     f = lambda x,y,z,x4: np.exp(x-2*x**2-y**2-z**2)*np.sin(10*(x+y+z+x*y**2))
     g = lambda x,y,z,x4: np.exp(-x+2*y**2+x*y**2*z)*np.sin(10*(x-y-2*x*y**2))
-    h = lambda x,y,z,x4: np.exp(x**2*y**2)*np.cos(x-y+z)
+    h = lambda x,y,z,x4: np.exp(x**2*y**2)*np.sin(x-y+z)
     f4 = lambda x,y,z,x4: x - y + z - x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], a, b)
+    roots = solve(funcs, a, b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex15():
     df = lambda x, y, z, x4 : (10*(1 + y**2)*np.exp(x - 2*x**2 - y**2 - z**2)*np.cos(10*(x + y + z + x*y**2)) + (1 - 4*x)*np.exp(x-2*x**2-y**2-z**2)*np.sin(10*(x+y+z+x*y**2)),
@@ -375,14 +394,15 @@ def ex16():
     g = lambda x,y,z,x4: (2*(x*z+0.1)**2+(y+0.1)**2-1)*(2*(z-0.3)**2+(y-0.15)**2-1)*((x-0.21)**2+2*(y-0.15)**2-1)
     h = lambda x,y,z,x4: (2*(y+0.1)**2-(z+.15)**2-1)*(2*(x+0.3)**2+(z-.15)**2-1)
     f4 = lambda x,y,z,x4: x - y + z - x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], a, b)
+    roots = solve(funcs, a, b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex16():
     df = lambda x, y, z, x4 : (2*y*(x*y+.3)*((x - .1)**2 + 2*(y*z-.1)**2-1) + 2*(x-.01)*((x*y+.3)**2+2*(z-.2)**2-1),
@@ -402,14 +422,15 @@ def ex17():
     g = lambda x,y,z,x4: np.sin(3*(x+y-z))
     h = lambda x,y,z,x4: np.sin(3*(x-y-z))
     f4 = lambda x,y,z,x4: -x + y - z + x4
+    funcs = [f,g,h,f4]
 
     a = [-1,-1,-1,-1]
     b = [1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4], a, b)
+    roots = solve(funcs, a, b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex17():
     df = lambda x, y, z, x4 : (3*np.cos(3*(x+y+z)), 3*np.cos(3*(x+y+z)), 3*np.cos(3*(x+y+z)), 0)
@@ -423,14 +444,15 @@ def ex18():
     g = lambda x,y,z,x4: np.sin(x*z)
     h = lambda x,y,z,x4: x*y + y**2 - 1
     f4 = lambda x,y,z,x4: x + y - z + x4
+    funcs = [f,g,h,f4]
 
     a=[-1,-1,-1,-1]
     b=[1,1,1,1]
 
     start = time()
-    roots = solve([f,g,h,f4],a,b)
+    roots = solve(funcs,a,b)
     t = time() - start
-    return residuals(f,g,h,f4,roots,t)
+    return t,residuals(funcs,roots)
 
 def dex18():
     df = lambda x, y, z, x4 : (1, 0, 6/np.sqrt(np.pi)*np.exp(-z**2), 0)
@@ -439,7 +461,42 @@ def dex18():
     df4 = lambda x, y, z, x4 : (1, 1, -1, 1)
     return df, dg, dh, df4
 
+def run_tests(path_name,save_stuff=True):
+    if save_stuff:
+        file = "t_tests/dim4/" + path_name + "/"
+        rootfile = "t_tests/dim4/roots/"+ path_name +"/"
+        ut.make_dir("dim4","t_tests")
+        ut.make_dir("roots","t_tests/dim4")
+        ut.make_dir(path_name,"t_tests/dim4")
+        ut.make_dir(path_name,"t_tests/dim4/roots")
+    tests = np.array([ex0,ex1,ex2,ex3,ex4,ex5,ex6,ex7,ex8,ex9,ex10,ex11,ex12,ex13,ex14,ex15,ex16,ex17,ex18])
+    times = np.zeros_like(tests)
+    avg_resids = np.zeros_like(tests)
+    max_resids = np.zeros_like(tests)
+    tests[0]()
+    for i,test in enumerate(tests):
+        if not save_stuff:
+            print("Running problem",i)
+        t, resids = test()
+        avg_resid = resids[0]
+        max_resid = resids[1]
+        roots = resids[2]
+        times[i] = t
+        max_resids[i] = max_resid
+        avg_resids[i] = avg_resid
+        if save_stuff:
+            np.save(rootfile+"test_"+str(i)+".npy",roots)
+        else:
+            print(roots)
+    
+    if save_stuff:
+        np.save(file+"times.npy",times)
+        np.save(file+"avg_resids.npy",avg_resids)
+        np.save(file+"max_resids.npy",max_resids)
+
 if __name__ == "__main__":
-    # max_residuals = [ex1(),ex2(),ex3(),ex4(),ex5(),ex6(),ex7(),ex8(),ex9(),ex10(),ex11(),ex12(),ex13(),ex14(),ex15(),ex16(),ex17(),ex18()]
-    # plot_resids(max_residuals)
-    ex0()
+    f = lambda x,y: x-y
+    g = lambda x,y: x**2 - y
+
+    print(yr.solve([f,g],[-1,-1],[1,1]))
+    run_tests("test",False)

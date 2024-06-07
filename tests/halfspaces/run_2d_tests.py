@@ -2,12 +2,8 @@ import numpy as np
 from yroots.Combined_Solver import solve
 from time import time
 from matplotlib import pyplot as plt
+import utils as ut
 
-types = ["erik_code","halfspaces","dim_reduction"]
-curr = types[0]
-
-file = "t_tests/dim2/" + curr + "/"
-rootfile = "t_tests/dim2/roots/"+curr+"/"
 
 def resids(funcs, roots):
     """ Finds the residuals of the given function at the roots.
@@ -374,8 +370,15 @@ def test_roots_10():
 
     return t, resids(funcs,yroots)
 
-if __name__ == "__main__":
+def run_tests(path_name):
     # Run all the tests!
+    file = "t_tests/dim2/" + path_name + "/"
+    rootfile = "t_tests/dim2/roots/"+path_name+"/"
+    ut.make_dir("dim2","t_tests")
+    ut.make_dir("roots","t_tests/dim2")
+    ut.make_dir(path_name,"t_tests/dim2")
+    ut.make_dir(path_name,"t_tests/dim2/roots")
+
     tests = np.array([test_roots_1_1,
                         test_roots_1_2,
                         test_roots_1_3,

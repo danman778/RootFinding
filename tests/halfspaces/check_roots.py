@@ -1,11 +1,5 @@
 import numpy as np
 
-dim = 3
-
-names = ["1.1","1.2","1.3","1.4","1.5","2.1","2.2","2.3","2.4","2.5","3.1","3.2","4.1","4.2","5.1","6.1","6.2","6.3","7.1","7.2","7.3","7.4","8.1","8.2","9.1","9.2","10.1"]
-types = ["erik_code/","halfspaces/","dim_reduction/"]
-path = "t_tests/dim{}/roots/".format(dim)
-
 
 def sort_roots(orig_roots,idx=0):
     #!!! DON'T USE! sort_roots2() actually works so use that. np.argsort doesn't respect the order stuff goes in. !!!
@@ -27,43 +21,68 @@ def sort_roots2(orig_roots):
     new_roots = np.sort(fancy_roots, order = ["x{}".format(k) for k in range(1,n+1)])
     return np.array([np.array(list(root)) for root in new_roots])
 
+def check_t_dim(dim,name,good_name = "good_roots"):
+    path = "t_tests/dim{}/roots/".format(dim)
+    failed_tests = []
+    if dim != 2:
+        val = True
+        for i in range(19):
+            good_roots = np.load(path+good_name+"/test_"+str(i)+".npy")
+            curr_roots = np.load(path+name+"/test_"+str(i)+".npy")
+            good_roots = np.round(good_roots,12)
+            curr_roots = np.round(curr_roots,12)
+            good_roots = sort_roots2(good_roots)
+            curr_roots = sort_roots2(curr_roots)
+            #Compare
+            try:
+                val = np.allclose(curr_roots,good_roots)
+            except:
+                val = False
+            #print("test",i,"pass:",val)
+            if not val:
+                failed_tests.append(("t",dim,i))
+    else:
+        names = ["1.1","1.2","1.3","1.4","1.5","2.1","2.2","2.3","2.4","2.5","3.1","3.2","4.1","4.2","5.1","6.1","6.2","6.3","7.1","7.2","7.3","7.4","8.1","8.2","9.1","9.2","10.1"]
+        for i,test_name in enumerate(names):
+            #Get the roots and sort them
+            good_roots = np.load(path+good_name+"/"+test_name+".npy")
+            curr_roots = np.load(path+name+"/"+test_name+".npy")
+            #Round at 12 decimal places for sort to work right. If the first 12 digits are right, we're probably good for our tests
+            curr_roots = np.round(good_roots,12)
+            good_roots = np.round(curr_roots,12)
+            curr_roots = sort_roots2(good_roots)
+            good_roots = sort_roots2(curr_roots)
+            #Compare
+            try:
+                val = np.allclose(curr_roots,good_roots)
+            except:
+                val = False            #print(name,"pass:",val)
+            if not val:
+                failed_tests.append(("t",dim,test_name))
+    return failed_tests
 
-if dim == 3:
-    for i in range(19):
-        e_roots = np.load(path+types[0]+"test_"+str(i)+".npy")
-        h_roots = np.load(path+types[1]+"test_"+str(i)+".npy")
-        d_roots = np.load(path+types[2]+"test_"+str(i)+".npy")
-        e_roots = np.round(e_roots,12)
-        d_roots = np.round(d_roots,12)
-        h_roots = np.round(h_roots,12)
-        e_roots = sort_roots2(e_roots)
-        d_roots = sort_roots2(d_roots)
-        h_roots = sort_roots2(h_roots)
-        #Compare
-        val = np.allclose(d_roots,e_roots) and np.allclose(e_roots,h_roots)
-        print("test",i,"pass:",val)
-        if not val:
-            print(e_roots)
-            print(d_roots)
-            print(h_roots)
-            print(e_roots-d_roots)
-else:
-    for name in names:
-        #Get the roots and sort them
-        e_roots = np.load(path+types[0]+name+".npy")
-        h_roots = np.load(path+types[1]+name+".npy")
-        d_roots = np.load(path+types[2]+name+".npy")
-        #Round at 12 decimal places for sort to work right. If the first 12 digits are right, we're probably good for our tests
-        e_roots = np.round(e_roots,12)
-        d_roots = np.round(d_roots,12)
-        h_roots = np.round(h_roots,12)
-        e_roots = sort_roots(e_roots)
-        d_roots = sort_roots(d_roots)
-        h_roots = sort_roots(h_roots)
-        #Compare
-        val = np.allclose(d_roots,e_roots) and np.allclose(e_roots,h_roots)
-        print(name,"pass:",val)
-        if not val:
-            print(e_roots)
-            print(d_roots)
-            print(h_roots)
+
+def check_p_dim(dim,name,good_name = "good_roots"):
+    highest_degs = [0,0,30,10,7,4,2,2,2,2,2]
+    test_nums = [0,0,300,300,300,300,200,200,200,100,100]
+    goodfile = "p_tests/dim{}/roots/".format(dim)+good_name+"/"
+    rootfile = "p_tests/dim{}/roots/".format(dim)+name+"/"
+    failed_tests = []
+    num_tests = test_nums[dim]
+    for deg in range(2,highest_degs[dim]+1):
+        for test in range(num_tests):
+            good_roots = np.load(goodfile+"deg{}/test{}_roots.npy".format(deg,test+1))
+            curr_roots = np.load(rootfile+"deg{}/test{}_roots.npy".format(deg,test+1))
+            curr_roots = np.round(good_roots,12)
+            good_roots = np.round(curr_roots,12)
+            curr_roots = sort_roots2(good_roots)
+            good_roots = sort_roots2(curr_roots)
+            try:
+                val = np.allclose(curr_roots,good_roots)
+            except:
+                val = False
+            #print("test",i,"pass:",val)
+            if not val:
+                failed_tests.append(("p",dim,deg,test+1))
+    return failed_tests
+
